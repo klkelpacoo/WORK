@@ -1,0 +1,131 @@
+<style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .main-title {
+        font-family: 'Poppins', sans-serif; color: #D81B60; font-size: 1.8em;
+        font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;
+    }
+    .main-title::before { content: '📋'; font-size: 1.2em; line-height: 1; }
+
+    .filtro-panel { 
+        background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07); 
+        margin-bottom: 25px; display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap; animation: fadeIn 0.6s ease-out; 
+    }
+
+    .filtro-item { display: flex; flex-direction: column; flex-grow: 1; min-width: 150px; }
+    .filtro-item label { font-size: 12px; font-weight: 600; color: #a83271; margin-bottom: 5px; position: relative; }
+
+    /* ANULACIÓN DEFINITIVA DE LÍNEAS */
+    .filtro-item label::before, .filtro-item label::after {
+        display: none !important; content: '' !important;
+    }
+
+    /* ESTILO BASE PARA TODOS LOS CONTROLES */
+    .filtro-item input, .filtro-item select, .filtro-item .flx-control-container {
+        border: 2px solid #fceef2; background-color: #fff; border-radius: 8px; height: 43px;
+        font-family: 'Poppins', sans-serif; font-size: 14px; transition: all 0.2s ease;
+    }
+    
+    /* ESTILO PARA INPUT Y SELECT NORMALES */
+    .filtro-item input, .filtro-item select { padding: 10px; box-sizing: border-box; }
+
+    /* ESTILO ESPECÍFICO PARA FLX-DBCOMBO */
+    .filtro-item flx-dbcombo { border: none; padding: 0; height: auto; }
+    .filtro-item flx-dbcombo .flx-input, .filtro-item flx-dbcombo .flx-select-button {
+        padding: 10px; border: none; height: 100%; box-sizing: border-box; background: transparent;
+    }
+
+    /* ESTILO DE FOCO UNIFICADO */
+    .filtro-item input:focus, .filtro-item select:focus, .filtro-item flx-dbcombo .flx-input:focus {
+        outline: none; border-color: #D94A8C; box-shadow: 0 0 0 3px rgba(217, 74, 140, 0.2);
+    }
+    .filtro-item flx-dbcombo:focus-within .flx-control-container { /* Borde de foco para el combo */
+        border-color: #D94A8C; box-shadow: 0 0 0 3px rgba(217, 74, 140, 0.2);
+    }
+
+    /* BOTONES */
+    .filtro-item-actions { margin-left: auto; display: flex; gap: 10px; }
+    .filtro-boton { 
+        padding: 10px 25px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 14px; 
+        color: #fff; background: #D94A8C; border: none; border-radius: 8px; cursor: pointer; 
+        transition: all 0.2s ease; height: 43px;
+    }
+    .filtro-boton:hover { background: #a83271; transform: translateY(-2px); }
+</style>
+
+<h1 class="main-title">Gestión de Muestras</h1>
+
+<div class="filtro-panel">
+    <div class="filtro-item">
+        <label for="filtroIdPedido">📦 Nº Pedido</label>
+        <input type="number" id="filtroIdPedido" placeholder="Ej: 182938">
+    </div>
+    <div class="filtro-item">
+        <label for="filtroNombreCliente">👤 Cliente</label>
+        <flx-dbcombo id="filtroNombreCliente" ObjectName="PLA_Pedidos_Cli_Linea" ViewName="Filtro_Cliente" SQLValueField="Cliente" SQLDisplayField="Cliente" PlaceHolder="Selecciona un cliente" distinct="true"></flx-dbcombo>
+    </div>
+    <div class="filtro-item">
+        <label for="filtroPlataforma">🏢 Plataforma</label>
+        <flx-dbcombo id="filtroPlataforma" ObjectName="PLA_Combo_Centros" ViewName="Filtro_CentroPlataforma" SQLValueField="Centro" SQLDisplayField="Centro" PlaceHolder="Selecciona una plataforma" distinct="true"></flx-dbcombo>
+    </div>
+    <div class="filtro-item">
+        <label for="filtroDescripcion">🏷️ Artículo</label>
+        <flx-dbcombo id="filtroDescripcion" ObjectName="PLA_ArticuloPTClientes" ViewName="PLA_v_PTsClientes" SQLValueField="Descrip" SQLDisplayField="Descrip" PlaceHolder="Selecciona un artículo" distinct="true"></flx-dbcombo>
+    </div>
+    <div class="filtro-item">
+        <label for="filtroFechaMin">🗓️ Fecha Mínima</label>
+        <input type="date" id="filtroFechaMin">
+    </div>
+    <div class="filtro-item">
+        <label for="filtroFechaMax">🗓️ Fecha Máxima</label>
+        <input type="date" id="filtroFechaMax">
+    </div>
+    <div class="filtro-item">
+        <label for="filtroAlmacen">🏢 Almacén</label>
+        <select id="filtroAlmacen">
+            <option value="">Todos</option>
+            <option value="0">Alhama</option>
+            <option value="1">Cieza</option>
+            <option value="9">Cancarix</option>
+        </select>
+    </div>
+    <div class="filtro-item-actions">
+        <button class="filtro-boton" onclick="aplicarFiltros()">Buscar</button>
+        <button class="filtro-boton" onclick="LimpiarFiltros()" style="background-color: #aaa;">Restablecer</button>
+    </div>
+</div>
+
+<script>
+    const MODULO_LISTA_NOMBRE = "Grid_Muestras";
+
+    function aplicarFiltros() {
+        var mainModule = $(`flx-list[modulename="${MODULO_LISTA_NOMBRE}"]`)[0];
+        if (!mainModule) { console.error("ERROR: No se encontró el módulo principal."); return; }
+        
+        var idPedido = $("#filtroIdPedido").val();
+        var nombreCliente = $("#filtroNombreCliente").val();
+        var plataforma = $("#filtroPlataforma").val();
+        var descripcion = $("#filtroDescripcion").val();
+        var fechaMin = $("#filtroFechaMin").val();
+        var fechaMax = $("#filtroFechaMax").val();
+        var almacen = $("#filtroAlmacen").val();
+        var conditions = [];
+        
+        if (idPedido) { conditions.push(`IdPedido = ${parseInt(idPedido, 10)}`); }
+        if (nombreCliente) { conditions.push(`NombreDelCliente = '${nombreCliente}'`); }
+        if (plataforma) { conditions.push(`NombreDelCentro = '${plataforma}'`); }
+        if (descripcion) { conditions.push(`DescripcionArticulo = '${descripcion}'`); }
+        if (almacen) { conditions.push(`Almacen = '${almacen}'`); }
+        if (fechaMin && fechaMax) { conditions.push(`FechaPedido BETWEEN '${fechaMin}' AND '${fechaMax}'`);
+        } else if (fechaMin) { conditions.push(`FechaPedido >= '${fechaMin}'`);
+        } else if (fechaMax) { conditions.push(`FechaPedido <= '${fechaMax}'`); }
+
+        var whereClause = conditions.join(" AND ");
+        mainModule.additionalWhere = whereClause;
+        mainModule.init();
+    }
+
+    function LimpiarFiltros() {
+        location.reload();
+    }
+</script>
