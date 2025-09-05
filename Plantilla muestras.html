@@ -1,0 +1,285 @@
+##CABECERA##
+
+<script> 
+ function runApp() { 
+     function setupPedidoListeners() { 
+         if (document.body.dataset.listenersAttached === 'true') return; 
+         document.body.dataset.listenersAttached = 'true'; 
+
+         document.body.addEventListener('click', function(event) { 
+             const card = event.target.closest('.sample-card-mini'); 
+             if (card && !event.target.closest('.btn')) { 
+                 const isAlreadyVisible = card.classList.contains('buttons-visible'); 
+                 document.querySelectorAll('.sample-card-mini').forEach(c => c.classList.remove('buttons-visible')); 
+                 if (!isAlreadyVisible) card.classList.add('buttons-visible'); 
+                 return;  
+             } 
+
+             const button = event.target.closest('.action-buttons .btn'); 
+             if (button) { 
+                 const clickedCard = button.closest('.sample-card-mini'); 
+
+                 if (button.classList.contains('btn-producir-con')) { 
+                     const paginaDestino = 'PLA_pg_Reparto'; 
+                     if (typeof flexygo !== 'undefined' && flexygo.nav) { 
+                         flexygo.nav.openPageName(paginaDestino, null, null, null, 'current'); 
+                     } 
+                  
+                 } else if (button.classList.contains('btn-producir-sin')) { 
+                      
+                     const idOrden = parseInt(clickedCard.dataset.idOrden, 10) || 0; 
+                     if (idOrden === 0) { 
+                         alert("Error: Este pedido de muestra no tiene una Orden de Producción asociada."); 
+                         return;  
+                     } 
+                      
+                     const idPedido = parseInt(clickedCard.dataset.idPedido, 10) || 0; 
+                     const idDoc = parseInt(clickedCard.dataset.idDoc, 10) || 0; 
+     _Bono, 10) || 0; 
+                     const idBultoLanzamiento = parseInt(clickedCard.dataset.idBultoLanzamiento, 10) || 0; 
+                     const kilos = parseFloat(clickedCard.dataset.kilos) || 0; 
+                     const idCategoria = parseInt(clickedCard.dataset.idCategoria, 10); 
+                     const esDestrio = (clickedCard.dataset.esDestrio || '0') === '1'; 
+                     const idLineaProduccion = parseInt(clickedCard.dataset.idLineaProduccion, 10) || 0; 
+                     const idSeccionProduccion = parseInt(clickedCard.dataset.idSeccionProduccion, 10) || 0; 
+                     const variedadEtiqueta = clickedCard.dataset.persIdVariedad || '0'; 
+                     const variedadEtiqueta2 = clickedCard.dataset.persIdVariedad2 || '0'; 
+                      
+                     const nombreDelProceso = 'PLA_dll_Genera_Bulto_Salida_Prod'; 
+                     const params = [ 
+                         { "Key": "IdPedido", "Value": idPedido }, 
+                         { "Key": "IdPedidoLinea", "Value": idLinea }, 
+                         { "Key": "Cajas", "Value": cajas }, 
+                         { "Key": "IdOrden", "Value": idOrden }, 
+                         { "Key": "IdBono", "Value": idBono }, 
+                         { "Key": "IdLanzamiento_Bulto", "Value": idBultoLanzamiento }, 
+                         { "Key": "EsNuevo", "Value": 0 }, 
+                         { "Key": "EsDestrio", "Value": esDestrio }, 
+                         { "Key": "Cantidad", "Value": kilos }, 
+                         { "Key": "IdVolcado_Partida", "Value": 0 }, 
+                         { "Key": "Pers_IdCategoria", "Value": idCategoria }, 
+                         { "Key": "IdMotivo", "Value": null }, 
+                         { "Key": "Pers_IdVariedad_Etiqueta", "Value": variedadEtiqueta }, 
+                         { "Key": "Pers_IdVariedad_Etiqueta_2", "Value": variedadEtiqueta2 }, 
+                         { "Key": "IdArticuloTF", "Value": '0' }, 
+                         { "Key": "IdPartida", "Value": null }, 
+                         { "Key": "IdLinea_Produccion", "Value": idLineaProduccion }, 
+                         { "Key": "IdSublinea", "Value": 0 }, 
+                         { "Key": "IdSeccion_Produccion", "Value": idSeccionProduccion }, 
+                         { "Key": "TipoSalida", "Value": 0 }, 
+                         { "Key": "CodBarras1", "Value": null }, 
+                         { "Key": "KilosxCaja", "Value": 0 }, 
+                     ]; 
+
+                     if (typeof flexygo !== 'undefined' && flexygo.Process) { 
+                         let proc = new flexygo.Process(nombreDelProceso, null, null); 
+                         console.log("Ejecutando proceso con los siguientes parámetros:", params); 
+                          
+                         proc.run(params, (response) => { 
+                             if (response.SuccessMessage || response.Success) { 
+                                 flexygo.msg.success("¡Proceso ejecutado con éxito!"); 
+                                 if (flexygo.summary) flexygo.summary.refresh(); 
+                             } else if (response.LastException && response.LastException.Message) { 
+                                 flexygo.msg.error("Error: " + response.LastException.Message); 
+                             } else { 
+                                 flexygo.msg.warning("El proceso ha terminado sin un mensaje claro."); 
+                             } 
+                         }); 
+                     } else { 
+                         alert("Error: Las APIs de Flexygo no están disponibles."); 
+                     } 
+                 } 
+             } 
+         }); 
+     } 
+
+     const observer = new MutationObserver((mutations, obs) => { 
+         if (document.querySelector('.sample-card-mini')) { 
+             setupPedidoListeners(); 
+             obs.disconnect(); 
+         } 
+     }); 
+     observer.observe(document.body, { childList: true, subtree: true }); 
+ } 
+
+ if (document.readyState === 'loading') {  
+     document.addEventListener('DOMContentLoaded', runApp);  
+ } else {  
+     runApp();  
+ } 
+ </script>
+
+ ##CUERPO##
+
+ <style>
+    @keyframes fadeIn-pop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes shine { 0% { transform: translateX(-100%) skewX(-25deg); } 100% { transform: translateX(200%) skewX(-25deg); } }
+    @keyframes icon-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    @keyframes slide-in-bottom { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+    .sample-card-mini {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background-color: #fff; border-radius: 12px; margin-bottom: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06); border: 1px solid #F8F8F8;
+        overflow: hidden; position: relative; transition: all 0.3s ease-out;
+        animation: fadeIn-pop 0.5s ease-out forwards;
+    }
+    .sample-card-mini:active { transform: scale(0.97); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+    .sample-card-mini::before {
+        content: ''; position: absolute; top: 0; left: 0;
+        width: 50%; height: 100%;
+        background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+        transform: translateX(-100%) skewX(-25deg);
+    }
+    .sample-card-mini:hover::before { animation: shine 0.8s ease; }
+    .sample-card-mini:hover { box-shadow: 0 8px 20px rgba(216, 27, 96, 0.1); }
+
+    .card-body { padding: 15px 20px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .pedido-info h2 { margin: 0; font-size: 1.2em; font-weight: 600; color: #D81B60; }
+    .fecha-badge { background-color: #FCE4EC; color: #AD1457; padding: 4px 8px; border-radius: 12px; font-weight: 500; font-size: 0.75em; }
+    .article-details { font-size: 0.9em; color: #666; }
+    .details-line { margin-top: 5px; font-size: 0.9em; color: #888; }
+    
+    .card-header, .article-details, .card-footer-quantities, .action-buttons { animation: slide-in-bottom 0.6s ease-out forwards; opacity: 0; }
+    .article-details { animation-delay: 0.1s; }
+    .card-footer-quantities { animation-delay: 0.2s; }
+    .action-buttons { animation-delay: 0.3s; }
+    .card-footer-quantities { 
+        display: grid; 
+        grid-template-columns: repeat(3, 1fr); 
+        background-color: #FCE4EC; 
+    }
+    .quantity-box { padding: 10px; text-align: center; border-top: 1px solid #f0f0f0; border-right: 1px solid #fce4ec; }
+    .quantity-box:last-child { border-right: none; }
+    .quantity-box .value { font-size: 1.3em; font-weight: 600; color: #C2185B; transition: transform 0.3s ease; }
+    .quantity-box .label { font-size: 0.7em; color: #AD1457; }
+    .quantity-box .icon { display: inline-block; transition: transform 0.3s ease; }
+    .sample-card-mini:hover .quantity-box .value { transform: scale(1.1); }
+    .sample-card-mini:hover .quantity-box .icon { animation: icon-bounce 0.5s ease; }
+
+    .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 0 20px 0 20px;
+        max-height: 0; opacity: 0; overflow: hidden;
+        transition: all 0.4s ease-in-out;
+    }
+    .sample-card-mini.buttons-visible .action-buttons {
+        max-height: 80px; opacity: 1; padding-bottom: 15px;
+        overflow: visible;
+    }
+    .btn { width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85em; cursor: pointer; transition: all 0.2s ease; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .btn-producir-con { background-color: #D81B60; color: white; }
+    .btn-producir-sin { background-color: transparent; color: #D81B60; border: 2px solid #D81B60; }
+    
+    .cliente-centro-info {
+        font-size: 0.8em;
+        font-weight: 500;
+        color: #888;
+        margin-top: 4px;
+    }
+
+    /* Estilo para la animación de salida de la tarjeta */
+    .sample-card-mini.hiding {
+        transition: all 0.5s ease-out;
+        opacity: 0;
+        transform: scale(0.9);
+        max-height: 0 !important;
+        padding: 0 !important;
+        margin-bottom: 0 !important;
+        overflow: hidden;
+        border: none;
+    }
+</style>
+
+<div class="sample-card-mini"
+     data-id-pedido="{{IdPedido}}"
+     data-articulo="{{Articulo}}"
+     data-kilos="{{Kilos}}"
+     data-cajas="{{Cajas}}"
+     data-id-orden="{{IdOrden}}"
+     data-id-bulto-lanzamiento="{{IdBulto_Lanzamiento}}"
+     data-id-categoria="{{Pers_IdCategoria}}"
+     data-pers-id-variedad="{{Pers_IdVariedad}}"
+     data-pers-id-variedad2="{{Pers_IdVariedad2}}">
+
+    <div class="card-body">
+        <div class="card-header">
+            <div class="pedido-info">
+                <h2>📦 Pedido: {{IdPedido}}</h2>
+                <div class="cliente-centro-info">
+                    <span>👤 {{NombreDelCliente}}</span> &nbsp;&bull;&nbsp; <span>🏢 {{NombreDelCentro}}</span>
+                </div>
+            </div>
+            <span class="fecha-badge">📅 {{FechaPedido|date:DD/MM/YYYY}}</span>
+        </div>
+        <div class="article-details">
+            <div>🏷️ {{DescripcionArticulo}}</div>
+            <div class="details-line">
+                <span>🏭 Almacén: {{Almacen | switch: [0: Alhama, 1: Cieza, 9: Cancarix, else: {{Almacen}}]}}</span>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer-quantities">
+        <div class="quantity-box">
+            <div class="value">{{Kilos}}</div>
+            <div class="label"><span class="icon">⚖️</span> Kilos</div>
+        </div>
+        <div class="quantity-box">
+            <div class="value">{{Cajas}}</div>
+            <div class="label"><span class="icon">📥</span> Cajas</div>
+        </div>
+        <div class="quantity-box">
+            <div class="value">{{Palets}}</div>
+            <div class="label"><span class="icon">🧱</span> Palets</div>
+        </div>
+    </div>
+    <div class="action-buttons">
+        <button class="btn btn-producir-sin">PRODUCIR</button>
+    </div>
+</div>
+
+##PIE##
+VACIO
+
+##VACIO##
+<style>
+    .no-results-container {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        text-align: center;
+        padding: 50px 20px;
+        background-color: #FFF8FB;
+        border: 2px dashed #F48FB1;
+        border-radius: 18px;
+        opacity: 0;
+        animation: fadeIn 0.8s ease-out forwards;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    .no-results-container .emoji {
+        font-size: 3em;
+        display: block;
+        margin-bottom: 15px;
+        animation: pulse 2s infinite;
+    }
+    .no-results-container h3 {
+        color: #D81B60;
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+    .no-results-container p {
+        color: #777;
+        font-size: 1.1em;
+    }
+</style>
+
+<div class="no-results-container">
+    <span class="emoji">🎉</span>
+    <h3>¡Todo listo por aquí!</h3>
+    <p>No tienes ninguna muestra pendiente de gestionar. ¡Buen trabajo!</p>
+</div>
