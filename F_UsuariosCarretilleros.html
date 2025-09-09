@@ -1,0 +1,130 @@
+<style>
+    .resumen-container { font-family: 'Poppins', sans-serif; padding: 20px; background: #fdf6f9; }
+
+    /* Estilos para el panel de filtros */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    .filtro-panel { 
+        background: #fff; 
+        padding: 20px; 
+        border-radius: 12px; 
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07); 
+        margin-bottom: 25px; 
+        display: flex; 
+        align-items: flex-end; 
+        gap: 15px; 
+        flex-wrap: wrap; 
+        animation: fadeIn 0.6s ease-out; 
+    }
+    .filtro-item { 
+        display: flex; 
+        flex-direction: column; 
+        flex-grow: 1; 
+    }
+    .filtro-item label { 
+        font-size: 12px; 
+        font-weight: 600; 
+        color: #a83271; 
+        margin-bottom: 5px; 
+    }
+    .filtro-item input { 
+        padding: 10px; 
+        border: 2px solid #fceef2; 
+        border-radius: 8px; 
+        font-family: 'Poppins', sans-serif; 
+        font-size: 14px; 
+        transition: border-color 0.2s ease, box-shadow 0.2s ease; 
+    }
+    .filtro-item input:focus { 
+        outline: none; 
+        border-color: #D94A8C; 
+        box-shadow: 0 0 0 3px rgba(217, 74, 140, 0.2); 
+    }
+    .filtro-boton { 
+        padding: 10px 25px; 
+        font-family: 'Poppins', sans-serif; 
+        font-weight: 600; 
+        font-size: 14px; 
+        color: #fff; 
+        background: #D94A8C; 
+        border: none; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        transition: background-color 0.2s ease, transform 0.2s ease; 
+        height: 43px; 
+    }
+    .filtro-boton:hover { 
+        background: #a83271; 
+        transform: translateY(-2px); 
+    }
+      }
+    .main-title {
+        font-family: 'Poppins', sans-serif;
+        color: #D81B60;
+        font-weight: 700;
+        font-size: 2em;
+        animation: pulseShadow 2s infinite;
+    }
+</style>
+
+<script>
+    function aplicarFiltros() {
+        console.log("DEBUG: aplicarFiltros ha sido llamada.");
+        
+        var mainModule = $('flx-list[modulename="GridResumenUsuarios"]')[0];
+        
+        if (!mainModule) {
+            console.error("ERROR: No se encontró el módulo principal. Verifique el nombre.");
+            return;
+        }
+
+        var usuario = $("#filtroUsuario").val();
+
+        console.log(`DEBUG: Valores de los filtros -> Usuario: "${usuario}"`);
+
+        var whereClause = '';
+        var conditions = [];
+
+        if (usuario && usuario !== '') {
+            conditions.push("Usuario LIKE '%" + usuario + "%'");
+        }
+
+        if (conditions.length > 0) {
+            whereClause = conditions.join(" AND ");
+        }
+
+        console.log("DEBUG: Cláusula WHERE generada:", whereClause);
+
+        mainModule.additionalWhere = whereClause;
+        mainModule.init(); 
+
+        console.log("DEBUG: El módulo principal ha sido refrescado.");
+    }
+
+    function LimpiarFiltrosC() {
+        console.log("DEBUG: limpiarFiltros ha sido llamada.");
+        $("#filtroUsuario").val('');
+        
+        console.log("DEBUG: Valores de los filtros reseteados.");
+        
+        var mainModule = $('flx-list[modulename="GridResumenUsuarios"]')[0];
+        if (mainModule) {
+            mainModule.additionalWhere = '';
+            mainModule.init();
+            console.log("DEBUG: El módulo principal ha sido restablecido a su estado inicial.");
+        } else {
+            console.error("ERROR: No se pudo restablecer el módulo. Módulo principal no encontrado.");
+        }
+    }
+</script>
+
+<div class="resumen-container">
+    <h1 class="main-title">🚜 Histórico de Carretilleros 📊</h1>
+
+<div class="filtro-panel">
+    <div class="filtro-item">
+        <label for="filtroUsuario">👤 Buscar por Usuario</label>
+        <input type="text" id="filtroUsuario" placeholder="Escribe un nombre...">
+    </div>
+    <button class="filtro-boton" onclick="aplicarFiltros()">Buscar</button>
+    <button class="filtro-boton" onclick="LimpiarFiltrosC()" style="background-color: #aaa;">Restablecer</button>
+</div>
