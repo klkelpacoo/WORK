@@ -1,0 +1,162 @@
+#CABECERA#
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+    /* Animación para la aparición de las filas */
+    @keyframes fadeInRow {
+        from { opacity: 0; transform: scale(0.98); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    
+    /* Contenedor principal */
+    .detalle-container {
+        font-family: 'Poppins', sans-serif;
+        padding: 20px;
+        background-color: #fdf6f9;
+    }
+    
+    /* Estilos para el total */
+    .total-box {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 16px;
+        color: #fff;
+        background-color: #D94A8C;
+        padding: 10px 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(217, 74, 140, 0.25);
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+
+    /* Estructura de la tabla */
+    .tabla-moderna {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07);
+        overflow: hidden; /* Para que el borde respete el redondeo */
+    }
+
+    /* Cabecera de la tabla */
+    .tabla-moderna th {
+        font-weight: 600;
+        padding: 16px 20px;
+        text-align: left;
+        color: #a83271;
+        font-size: 14px;
+        text-transform: uppercase;
+        border-bottom: 3px solid #fceef2;
+    }
+
+    /* Filas y celdas */
+    .tabla-moderna td {
+        padding: 15px 20px;
+        border-bottom: 1px solid #f5f5f5;
+        color: #555;
+        font-size: 14px;
+    }
+
+    .tabla-moderna tbody tr {
+        animation: fadeInRow 0.5s ease-out forwards;
+        animation-delay: calc(0.05s * var(--row-index));
+        opacity: 0;
+    }
+
+    .tabla-moderna tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .tabla-moderna tbody tr:hover {
+        background-color: #fdf6f9;
+    }
+
+    .dato-usuario {
+        font-weight: 600;
+        color: #333;
+    }
+    .dato-fecha {
+        white-space: nowrap;
+    }
+    .dato-codigo {
+        font-family: 'Courier New', Courier, monospace;
+        font-weight: bold;
+        background-color: #f5f5f5;
+        padding: 3px 8px;
+        border-radius: 4px;
+    }
+</style>
+
+<script>
+  
+$(document).ready(function() {
+
+    /**
+     * Esta función lee el total directamente del span 'numRows' del paginador
+     * y lo copia en el botón rosa.
+     */
+    function sincronizarBotonConPaginador() {
+        // 1. Apuntamos DIRECTAMENTE al span que contiene el número total.
+        const totalElement = $('.pageInfo .numRows');
+
+        // 2. Apuntamos a tu botón.
+        const botonTotal = $('.total-box');
+
+        // 3. Si ambos elementos existen...
+        if (totalElement.length > 0 && botonTotal.length > 0) {
+            
+            // 4. Obtenemos el número directamente, sin necesidad de cortar texto.
+            const numeroTotal = totalElement.text();
+            const textoNuevoBoton = 'Total Movimientos: ' + numeroTotal;
+
+            // 5. Si el texto es diferente, lo actualizamos.
+            if (botonTotal.text() !== textoNuevoBoton) {
+                botonTotal.text(textoNuevoBoton);
+            }
+        }
+    }
+
+    // --- INICIAMOS EL SINCRONIZADOR ---
+    // Ejecutamos la función cada medio segundo para asegurar que siempre esté actualizada.
+    setInterval(sincronizarBotonConPaginador, 500);
+
+});
+  
+</script>
+
+<div class="detalle-container">
+    <div class="total-box">Calculando total...</div>
+    <table class="tabla-moderna">
+        <thead>
+            <tr>
+                <th>👤 Usuario</th>
+                <th>⏰ Fecha y Hora</th>
+                <th>📦 Pallet</th>
+                <th>🗺️ Ubicación</th>
+                <th>📍 Almacén</th>
+            </tr>
+        </thead>
+        <tbody>
+
+
+#CUERPO#
+
+<tr style="--row-index: {{sys-rowindex}};">
+    <td class="dato-usuario">{{Usuario}}</td>
+    <td class="dato-fecha">{{FechaInsertUpdate | date:DD/MM/YYYY HH:mm:ss}}</td>
+    <td>
+        <span class="dato-codigo">{{CodBarras1}}</span>
+    </td>
+    <td>{{Destino}}</td>
+    <td>{{NombreAlmacen}}</td>
+</tr>
+
+#PIE#
+
+</tbody>
+    </table>
+</div>
