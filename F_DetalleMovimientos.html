@@ -1,0 +1,149 @@
+<style>
+    /* Estilos generales para el panel de filtros y sus elementos */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    .filtro-panel { 
+        background: #fff; 
+        padding: 20px; 
+        border-radius: 12px; 
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07); 
+        margin-bottom: 25px; 
+        display: flex; 
+        align-items: flex-end; 
+        gap: 15px; 
+        flex-wrap: wrap; 
+        animation: fadeIn 0.6s ease-out; 
+    }
+    .filtro-item { 
+        display: flex; 
+        flex-direction: column; 
+        flex-grow: 1; 
+    }
+    .filtro-item label { 
+        font-size: 12px; 
+        font-weight: 600; 
+        color: #a83271; 
+        margin-bottom: 5px; 
+    }
+    .filtro-item input[type="text"], .filtro-item input[type="date"] { 
+        padding: 10px; 
+        border: 2px solid #fceef2; 
+        border-radius: 8px; 
+        font-family: 'Poppins', sans-serif; 
+        font-size: 14px; 
+        transition: border-color 0.2s ease, box-shadow 0.2s ease; 
+    }
+    .filtro-item input:focus { 
+        outline: none; 
+        border-color: #D94A8C; 
+        box-shadow: 0 0 0 3px rgba(217, 74, 140, 0.2); 
+    }
+    
+    /* Estilo principal para los botones (Buscar y Restablecer) */
+    .filtro-boton { 
+        padding: 10px 25px; 
+        font-family: 'Poppins', sans-serif; 
+        font-weight: 600; 
+        font-size: 14px; 
+        color: #fff; 
+        background: #D94A8C; 
+        border: none; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        transition: all 0.2s ease; 
+        height: 43px; 
+    }
+    .filtro-boton:hover { 
+        background: #a83271; 
+        transform: translateY(-2px); 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    /* Estilo específico para el botón de Restablecer para diferenciarlo */
+    .filtro-boton.reset {
+        background: #6c757d; /* Un tono gris neutro */
+    }
+    .filtro-boton.reset:hover {
+        background: #5a6268; /* Un gris más oscuro */
+    }
+</style>
+
+<script>
+    /**
+     * Aplica los filtros introducidos por el usuario construyendo una cláusula WHERE.
+     */
+    function aplicarFiltros() {
+        var mainModule = document.querySelector('flx-list[modulename="GridDetallesMovimientos"]');
+        if (!mainModule) {
+            console.error("ERROR: Módulo 'GridDetallesMovimientos' no encontrado.");
+            return;
+        }
+
+        var fechaInicio = document.getElementById("filtroFechaInicio").value;
+        var fechaFin = document.getElementById("filtroFechaFin").value;
+        var codBarras = document.getElementById("filtroPalet").value;
+        var conditions = [];
+
+        if (fechaInicio) {
+            conditions.push("FechaInsertUpdate >= CONVERT(DATETIME, '" + fechaInicio + " 00:00:00', 121)");
+        }
+        if (fechaFin) {
+            conditions.push("FechaInsertUpdate <= CONVERT(DATETIME, '" + fechaFin + " 23:59:59', 121)");
+        }
+        if (codBarras && codBarras.trim() !== '') {
+            conditions.push("CodBarras1 LIKE '%" + codBarras.trim() + "%'");
+        }
+
+        mainModule.additionalWhere = conditions.join(" AND ");
+        mainModule.init(); 
+
+        console.log("DEBUG: El módulo principal ha sido refrescado con la cláusula:", mainModule.additionalWhere);
+    }
+
+    /**
+     * Limpia todos los filtros y restablece la vista del grid.
+     * -- CORREGIDO: Usa .additionalWhere y .init() para ser compatible con este módulo --
+     */
+    function LimpiarFiltrosCD() {
+        // 1. Limpiamos los valores de los campos de filtro
+        document.getElementById("filtroFechaInicio").value = '';
+        document.getElementById("filtroFechaFin").value = '';
+        document.getElementById("filtroPalet").value = '';
+        
+        console.log("DEBUG: Campos de filtro reseteados.");
+        
+        // 2. Buscamos el componente de la lista de Flexygo
+        const mainModule = document.querySelector('flx-list[modulename="GridDetallesMovimientos"]');
+        
+        // 3. Si lo encontramos, usamos el mismo método que la función de aplicar filtros
+        if (mainModule) {
+            // Vaciamos la cláusula de filtro personalizada
+            mainModule.additionalWhere = '';
+            
+            // Re-inicializamos el módulo para que recargue los datos originales
+            mainModule.init();
+
+            console.log("DEBUG: El módulo ha sido reseteado usando .additionalWhere='' y .init().");
+        } else {
+            console.error("ERROR: Módulo 'GridDetallesMovimientos' no encontrado.");
+        }
+    }
+</script>
+
+<div class="filtro-panel">
+    <div class="filtro-item">
+        <label for="filtroFechaInicio">📅 Fecha de Inicio</label>
+        <input type="date" id="filtroFechaInicio">
+    </div>
+    <div class="filtro-item">
+        <label for="filtroFechaFin">📅 Fecha de Fin</label>
+        <input type="date" id="filtroFechaFin">
+    </div>
+    <div class="filtro-item">
+        <label for="filtroPalet">📦 Código de Palet</label>
+        <input type="text" id="filtroPalet" placeholder="Escribe un código...">
+    </div>
+    
+    <button class="filtro-boton" onclick="aplicarFiltros()">Buscar</button>
+    
+    <button class="filtro-boton reset" onclick="LimpiarFiltrosCD()">Restablecer</button>
+</div>
